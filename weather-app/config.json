@@ -1,0 +1,7 @@
+{
+    "storage": "file",
+    "file_path": "location.json",
+    "latitude": 53.6688,
+    "longitude": 23.8223,
+    "log_level": "info"
+}
