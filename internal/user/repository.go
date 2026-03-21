@@ -1,4 +1,3 @@
-go:generate mockgen -source=$GOFILE -destination=mocks/user_repository_mock.go -package=mocks
 package user
 
 import (
@@ -6,16 +5,13 @@ import (
     "database/sql"
 )
 
-// User — структура пользователя
 type User struct {
-    ID    int
-    Name  string
-    Email string
+    ID    int    `json:"id"`
+    Name  string `json:"name"`
+    Email string `json:"email"`
 }
 
-// UserRepository — интерфейс для работы с пользователями
-// Это ключевой момент для тестирования!
-type UserRepository interface {
+type Repository interface {
     GetUser(ctx context.Context, id int) (*User, error)
     CreateUser(ctx context.Context, user *User) error
     UpdateUser(ctx context.Context, user *User) error
@@ -23,20 +19,18 @@ type UserRepository interface {
     ListUsers(ctx context.Context) ([]User, error)
 }
 
-// SQLiteRepository — реализация интерфейса для SQLite
+// SQLiteRepository реализация
 type SQLiteRepository struct {
     db *sql.DB
 }
 
-// NewSQLiteRepository создает новый репозиторий
 func NewSQLiteRepository(db *sql.DB) *SQLiteRepository {
     return &SQLiteRepository{db: db}
 }
 
-// GetUser получает пользователя по ID
 func (r *SQLiteRepository) GetUser(ctx context.Context, id int) (*User, error) {
     var user User
-    err := r.db.QueryRowContext(ctx, 
+    err := r.db.QueryRowContext(ctx,
         "SELECT id, name, email FROM users WHERE id = ?", id).
         Scan(&user.ID, &user.Name, &user.Email)
     if err != nil {
@@ -45,7 +39,6 @@ func (r *SQLiteRepository) GetUser(ctx context.Context, id int) (*User, error) {
     return &user, nil
 }
 
-// CreateUser создает нового пользователя
 func (r *SQLiteRepository) CreateUser(ctx context.Context, user *User) error {
     result, err := r.db.ExecContext(ctx,
         "INSERT INTO users (name, email) VALUES (?, ?)",
@@ -62,7 +55,6 @@ func (r *SQLiteRepository) CreateUser(ctx context.Context, user *User) error {
     return nil
 }
 
-// UpdateUser обновляет данные пользователя
 func (r *SQLiteRepository) UpdateUser(ctx context.Context, user *User) error {
     _, err := r.db.ExecContext(ctx,
         "UPDATE users SET name = ?, email = ? WHERE id = ?",
@@ -70,13 +62,11 @@ func (r *SQLiteRepository) UpdateUser(ctx context.Context, user *User) error {
     return err
 }
 
-// DeleteUser удаляет пользователя
 func (r *SQLiteRepository) DeleteUser(ctx context.Context, id int) error {
     _, err := r.db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", id)
     return err
 }
 
-// ListUsers возвращает список всех пользователей
 func (r *SQLiteRepository) ListUsers(ctx context.Context) ([]User, error) {
     rows, err := r.db.QueryContext(ctx, "SELECT id, name, email FROM users ORDER BY id")
     if err != nil {
