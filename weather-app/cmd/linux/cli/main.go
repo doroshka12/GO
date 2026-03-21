@@ -3,6 +3,7 @@ package main
 import (
     "os"
 
+    "github.com/doroshka12/GO/weather-app/internal/adapters/weather"
     "github.com/doroshka12/GO/weather-app/internal/pkg/app/cli"
     "github.com/doroshka12/GO/weather-app/pkg/logger"
 )
@@ -11,8 +12,11 @@ func main() {
     // Создаем логгер
     l := logger.New()
 
-    // Создаем приложение с логгером
-    app := cli.New(l)
+    // Создаем адаптер для погоды
+    wi := weather.New(l)
+
+    // Создаем приложение с логгером и погодным адаптером
+    app := cli.New(l, wi)
 
     // Запускаем приложение
     err := app.Run()
