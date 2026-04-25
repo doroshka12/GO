@@ -1,17 +1,27 @@
-.PHONY: run build clean test
+.PHONY: run run-gui build build-gui test clean
 
 # Переменные
 BINARY_NAME=weather-cli
+GUI_BINARY_NAME=weather-gui
 BUILD_DIR=build
 
 # Запуск CLI приложения
 run:
 	go run ./cmd/linux/cli/main.go
 
-# Сборка бинарника
+# Запуск GUI приложения
+run-gui:
+	go run ./cmd/linux/gui/main.go
+
+# Сборка CLI бинарника
 build:
 	mkdir -p $(BUILD_DIR)
 	go build -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/linux/cli/main.go
+
+# Сборка GUI бинарника
+build-gui:
+	mkdir -p $(BUILD_DIR)
+	go build -o $(BUILD_DIR)/$(GUI_BINARY_NAME) ./cmd/linux/gui/main.go
 
 # Тестирование
 test:
@@ -35,21 +45,3 @@ deps:
 # Форматирование кода
 fmt:
 	go fmt ./...
-
-# Линтер
-lint:
-	golangci-lint run
-
-# Запуск с отладкой
-run-debug:
-	go run ./cmd/linux/cli/main.go -debug
-
-run:
-	go run ./cmd/linux/cli/main.go
-
-run-debug:
-	DEBUG=true go run ./cmd/linux/cli/main.go
-
-build:
-	mkdir -p build
-	go build -o build/weather-cli ./cmd/linux/cli/main.go
