@@ -14,33 +14,35 @@ type Logger interface {
     Error(string, error)
 }
 
-// WeatherInfo интерфейс для получения информации о погоде
+// WeatherInfo интерфейс для получения информации о погоде (теперь возвращает ошибку)
 type WeatherInfo interface {
-    GetTemperature(lat, long float64) models.TempInfo
+    GetTemperature(lat, long float64) (models.TempInfo, error)
 }
 
 // cliApp структура CLI приложения
 type cliApp struct {
-    l   Logger
-    wi  WeatherInfo
-    cfg config.Config
+    l    Logger
+    wi   WeatherInfo
+    cfg  config.Config
 }
 
 // New создает новое CLI приложение
 func New(l Logger, wi WeatherInfo, cfg config.Config) *cliApp {
     return &cliApp{
-        l:   l,
-        wi:  wi,
-        cfg: cfg,
+        l:    l,
+        wi:   wi,
+        cfg:  cfg,
     }
 }
 
 // Run запускает приложение
 func (c *cliApp) Run() error {
-    c.l.Debug("Getting weather information...")
-    
-    tempInfo := c.wi.GetTemperature(c.cfg.L.Lat, c.cfg.L.Long)
-    
+    tempInfo, err := c.wi.GetTemperature(c.cfg.L.Lat, c.cfg.L.Long)
+    if err != nil {
+        c.l.Error("can't get temp info", err)
+        return err
+    }
+
     fmt.Printf(
         "Температура воздуха - %.2f градусов цельсия\n",
         tempInfo.Temp,

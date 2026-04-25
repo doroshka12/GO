@@ -88,11 +88,9 @@ func (wi *WeatherInfo) getWeatherInfo(lat, long float64) error {
 }
 
 // GetTemperature возвращает температуру для указанных координат
-func (wi *WeatherInfo) GetTemperature(lat, long float64) models.TempInfo {
-    if !wi.isLoaded {
-        wi.getWeatherInfo(lat, long)
-    }
+func (wi *WeatherInfo) GetTemperature(lat, long float64) (models.TempInfo, error) {
+    err := wi.getWeatherInfo(lat, long)
     return models.TempInfo{
         Temp: wi.c.Temp,
-    }
+    }, err
 }

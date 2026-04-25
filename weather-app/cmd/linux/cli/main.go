@@ -3,6 +3,7 @@ package main
 import (
     "os"
 
+    pogodaby "github.com/doroshka12/GO/weather-app/internal/adapters/pogoda_by"
     "github.com/doroshka12/GO/weather-app/internal/adapters/weather"
     "github.com/doroshka12/GO/weather-app/internal/pkg/app/cli"
     "github.com/doroshka12/GO/weather-app/internal/pkg/flags"
@@ -30,7 +31,7 @@ func main() {
     // Создаем логгер
     l := logger.New()
 
-    // Получаем провайдер погоды
+    // Получаем провайдер погоды в зависимости от конфигурации
     wi := getProvider(cfg, l)
 
     // Создаем приложение
@@ -47,15 +48,18 @@ func main() {
 }
 
 // getProvider возвращает реализацию интерфейса WeatherInfo
+// в зависимости от типа провайдера в конфигурации
 func getProvider(cfg config.Config, l cli.Logger) cli.WeatherInfo {
     var wi cli.WeatherInfo
-    
+
     switch cfg.P.Type {
     case "open-meteo":
         wi = weather.New(l)
+    case "pogoda":
+        wi = pogodaby.New(l)
     default:
         wi = weather.New(l)
     }
-    
+
     return wi
 }
