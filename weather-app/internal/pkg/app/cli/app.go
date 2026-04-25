@@ -4,6 +4,7 @@ import (
     "fmt"
 
     "github.com/doroshka12/GO/weather-app/internal/domain/models"
+    "github.com/doroshka12/GO/weather-app/pkg/config"
 )
 
 // Logger интерфейс логгера
@@ -15,32 +16,30 @@ type Logger interface {
 
 // WeatherInfo интерфейс для получения информации о погоде
 type WeatherInfo interface {
-    GetTemperature(float64, float64) models.TempInfo
+    GetTemperature(lat, long float64) models.TempInfo
 }
 
 // cliApp структура CLI приложения
 type cliApp struct {
-    l  Logger
-    wi WeatherInfo
+    l   Logger
+    wi  WeatherInfo
+    cfg config.Config
 }
 
 // New создает новое CLI приложение
-func New(l Logger, wi WeatherInfo) *cliApp {
+func New(l Logger, wi WeatherInfo, cfg config.Config) *cliApp {
     return &cliApp{
-        l:  l,
-        wi: wi,
+        l:   l,
+        wi:  wi,
+        cfg: cfg,
     }
 }
 
 // Run запускает приложение
 func (c *cliApp) Run() error {
-    // Координаты Гродно (можно потом вынести в конфиг)
-    latitude := 53.6688
-    longitude := 23.8223
-
     c.l.Debug("Getting weather information...")
     
-    tempInfo := c.wi.GetTemperature(latitude, longitude)
+    tempInfo := c.wi.GetTemperature(c.cfg.L.Lat, c.cfg.L.Long)
     
     fmt.Printf(
         "Температура воздуха - %.2f градусов цельсия\n",

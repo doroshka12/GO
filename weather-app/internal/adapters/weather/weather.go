@@ -1,6 +1,6 @@
 package weather
 
-iimport (
+import (
     "encoding/json"
     "errors"
     "fmt"

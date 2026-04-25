@@ -5,25 +5,57 @@ import (
 
     "github.com/doroshka12/GO/weather-app/internal/adapters/weather"
     "github.com/doroshka12/GO/weather-app/internal/pkg/app/cli"
+    "github.com/doroshka12/GO/weather-app/internal/pkg/flags"
+    "github.com/doroshka12/GO/weather-app/pkg/config"
     "github.com/doroshka12/GO/weather-app/pkg/logger"
 )
 
 func main() {
+    // Парсим аргументы командной строки
+    arguments := flags.Parse()
+
+    // Открываем конфигурационный файл
+    r, err := os.Open(arguments.Path)
+    if err != nil {
+        panic(err)
+    }
+    defer r.Close()
+
+    // Парсим конфигурацию
+    cfg, err := config.Parse(r)
+    if err != nil {
+        panic(err)
+    }
+
     // Создаем логгер
     l := logger.New()
 
-    // Создаем адаптер для погоды
-    wi := weather.New(l)
+    // Получаем провайдер погоды
+    wi := getProvider(cfg, l)
 
-    // Создаем приложение с логгером и погодным адаптером
-    app := cli.New(l, wi)
+    // Создаем приложение
+    app := cli.New(l, wi, cfg)
 
     // Запускаем приложение
-    err := app.Run()
+    err = app.Run()
     if err != nil {
         l.Error("Some error", err)
         os.Exit(1)
     }
 
     os.Exit(0)
+}
+
+// getProvider возвращает реализацию интерфейса WeatherInfo
+func getProvider(cfg config.Config, l cli.Logger) cli.WeatherInfo {
+    var wi cli.WeatherInfo
+    
+    switch cfg.P.Type {
+    case "open-meteo":
+        wi = weather.New(l)
+    default:
+        wi = weather.New(l)
+    }
+    
+    return wi
 }
